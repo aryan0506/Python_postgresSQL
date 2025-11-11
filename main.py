@@ -3,13 +3,13 @@ from pydantic import BaseModel
 from typing import List, Annotated
 import models
 from database import engine, Sessionlocal
-from sqlalchemy.orm import declarative_base, Session
+from sqlalchemy.orm import  Session
 
 app = FastAPI()
-models.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)  # tells SQLAlchemy to create all tables in the database if they don’t exist.
 
 
-class ChoiceBase(BaseModel):
+class ChoiceBase(BaseModel):  # Pydantic Schemas: These define how incoming JSON data should look when a user sends a request.
     choice_text: str
     is_correct: bool
 
@@ -19,7 +19,7 @@ class QuestionBase(BaseModel):
     choices: List[ChoiceBase]
 
 
-def get_db():
+def get_db():  # This function creates and closes the database session.
     db = Sessionlocal()
     try:
         yield db
@@ -27,7 +27,9 @@ def get_db():
         db.close()
 
 
-db_dependency = Annotated[Session, Depends(get_db)]
+db_dependency = Annotated[Session, Depends(get_db)] #This tells FastAPI:
+
+#“Whenever you see db: db_dependency in a route, call get_db() and inject the database session here.”
 
 
 @app.post("/questions/")
